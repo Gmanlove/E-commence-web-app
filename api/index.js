@@ -7,6 +7,7 @@ const cors = require("cors");
 dotenv.config();
 
 // Import routes and other files
+const cartRoute = require('./routes/cartRoutes');
 const products = require("./data/Products");
 const databaseSeeder = require("./databaseSeeder");
 const userRoute = require("./routes/User");
@@ -35,7 +36,7 @@ app.use("/api/seed", databaseSeeder); // Database seeding route
 app.use("/api/users", userRoute); // Routes for users
 app.use("/api/products", productRoute); // Routes for products
 app.use("/api/orders", orderRoute); // Routes for orders
-
+app.use('/api/cart', cartRoute);
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
