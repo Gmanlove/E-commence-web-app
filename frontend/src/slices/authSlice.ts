@@ -7,6 +7,11 @@ interface AuthState {
   error: string | null;
 }
 
+// Get user info from localStorage if available
+const userInfoFromStorage = localStorage.getItem('userInfo')
+  ? JSON.parse(localStorage.getItem('userInfo')!)
+  : null;
+  
 const initialState: AuthState = {
   userInfo: localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')!) : null,
   loading: false,

@@ -75,4 +75,40 @@ router.get(
   })
 );
 
+// @desc    Remove item from cart
+// @route   DELETE /api/cart/remove/:productId
+// @access  Private
+router.delete(
+  '/remove/:productId',
+  protect,
+  asyncHandler(async (req, res) => {
+    const { productId } = req.params;
+    console.log('Request to remove product with ID:', productId); // Debugging log
+
+    if (!productId) {
+      console.error('No productId provided in request'); // Debugging log
+      return res.status(400).json({ message: 'Product ID is required' });
+    }
+
+    const cart = await Cart.findOne({ user: req.user._id });
+
+    if (!cart) {
+      console.error('Cart not found for user:', req.user._id); // Debugging log
+      return res.status(404).json({ message: 'Cart not found' });
+    }
+
+    const itemIndex = cart.items.findIndex((item) => item.product.toString() === productId);
+
+    if (itemIndex === -1) {
+      console.error('Item not found in cart with product ID:', productId); // Debugging log
+      return res.status(404).json({ message: 'Item not found in cart' });
+    }
+
+    cart.items.splice(itemIndex, 1); // Remove item from cart
+    await cart.save();
+    console.log('Item removed successfully, updated cart:', cart); // Debugging log
+    res.status(200).json(cart);
+  })
+);
+
 module.exports = router;

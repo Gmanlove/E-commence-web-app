@@ -6,11 +6,13 @@ import Loader from '../components/Loader';
 import Message from '../components/Message';
 
 interface CartItem {
-  productId: string;
-  name: string;
+  product: {
+    _id: string; // Updated to match nested product structure
+    name: string;
+    price: number;
+    image: string;
+  };
   qty: number;
-  price: number;
-  image: string;
 }
 
 const Cart: React.FC = () => {
@@ -23,6 +25,7 @@ const Cart: React.FC = () => {
     setError('');
     try {
       const cart = await fetchCartAPI(); // Fetch cart items from the API
+      console.log('Fetched cart items:', cart.items); // Debugging log to check the structure
       setCartItems(cart.items); // Ensure items are set correctly
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch cart items');
@@ -49,10 +52,19 @@ const Cart: React.FC = () => {
   };
 
   const handleRemoveFromCart = async (productId: string) => {
+    console.log('Attempting to remove product with ID:', productId); // Debugging log
+
+    if (!productId) {
+      setError('Invalid product ID');
+      console.error('Error: productId is undefined or invalid'); // Debugging log to identify the issue
+      return;
+    }
+
     setLoading(true);
     setError('');
     try {
       const updatedCart = await removeFromCartAPI(productId); // Correct function call
+      console.log('Updated cart after removal:', updatedCart); // Debugging log to verify removal
       setCartItems(updatedCart.items); // Updated cart items
     } catch (err) {
       setError('Failed to remove item from cart');
@@ -71,17 +83,23 @@ const Cart: React.FC = () => {
         {cartItems.length === 0 ? (
           <p>Your cart is empty</p>
         ) : (
-          cartItems.map((item) => (
-            <div key={item.productId} className="border p-4 mb-4">
-              <img src={item.image} alt={item.name} className="w-16 h-16" />
-              <h2>{item.name}</h2>
-              <p>Qty: {item.qty}</p>
-              <p>Price: ${item.price}</p>
-              <button onClick={() => handleRemoveFromCart(item.productId)} className="bg-red-500 text-white px-2 py-1">
-                Remove
-              </button>
-            </div>
-          ))
+          cartItems.map((item) => {
+            console.log('Rendering cart item:', item); // Debugging log for each cart item
+            return (
+              <div key={item.product._id} className="border p-4 mb-4">
+                <img src={item.product.image} alt={item.product.name} className="w-16 h-16" />
+                <h2>{item.product.name}</h2>
+                <p>Qty: {item.qty}</p>
+                <p>Price: ${item.product.price}</p>
+                <button
+                  onClick={() => handleRemoveFromCart(item.product._id)} // Access `product._id` correctly
+                  className="bg-red-500 text-white px-2 py-1"
+                >
+                  Remove
+                </button>
+              </div>
+            );
+          })
         )}
       </main>
       <Footer />

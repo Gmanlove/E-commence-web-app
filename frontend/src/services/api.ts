@@ -21,48 +21,46 @@ axiosInstance.interceptors.request.use(
 );
 
 // Product APIs
-
-// Fetch all products
 export const fetchProducts = async () => {
   const response = await axiosInstance.get('/products');
   return response.data;
 };
 
-// Fetch a product by ID
 export const fetchProductById = async (id: string) => {
   const response = await axiosInstance.get(`/products/${id}`);
   return response.data;
 };
 
 // User APIs
-
-// User Login
 export const loginUser = async (email: string, password: string) => {
-  const response = await axios.post(`${API_URL}/users/login`, { email, password });
+  const response = await axiosInstance.post('/users/login', { email, password });
   return response.data; // Contains user data and token
 };
 
-// User Registration
 export const registerUser = async (name: string, email: string, password: string) => {
-  const response = await axios.post(`${API_URL}/users`, { name, email, password });
+  const response = await axiosInstance.post('/users', { name, email, password });
   return response.data; // Contains user data
 };
 
-// Fetch user profile
-export const fetchUserProfile = async () => {
-  const response = await axiosInstance.get('/users/profile');
-  return response.data; // Contains user profile data
+export const fetchUserProfile = async (token: string) => {
+  const response = await axiosInstance.get('/users/profile', {
+      headers: {
+          Authorization: `Bearer ${token}`,
+      },
+  });
+  return response.data;
 };
 
-// Update user profile
-export const updateUserProfile = async (name: string, email: string, password?: string) => {
-  const response = await axiosInstance.put('/users/profile', { name, email, password });
-  return response.data; // Contains updated user data
+export const updateUserProfile = async (token: string, profileData: any) => {
+  const response = await axiosInstance.put('/users/profile', profileData, {
+      headers: {
+          Authorization: `Bearer ${token}`,
+      },
+  });
+  return response.data;
 };
 
 // Cart APIs
-
-// Fetch cart items
 export const fetchCartAPI = async () => {
   try {
     const response = await axiosInstance.get('/cart'); // Correct endpoint and method
@@ -73,7 +71,6 @@ export const fetchCartAPI = async () => {
   }
 };
 
-// Add item to cart
 export const addToCartAPI = async (productId: string, qty: number) => {
   try {
     const response = await axiosInstance.post('/cart/add', { productId, qty });
@@ -84,45 +81,42 @@ export const addToCartAPI = async (productId: string, qty: number) => {
   }
 };
 
-// Remove item from cart
 export const removeFromCartAPI = async (productId: string) => {
+  if (!productId) {
+    throw new Error('Product ID is required to remove an item from the cart.'); // Ensure productId is not undefined
+  }
+
   try {
-    const response = await axiosInstance.delete(`/cart/remove/${productId}`);
+    const response = await axiosInstance.delete(`/cart/remove/${productId}`); // Correctly use productId in the URL
     return response.data; // Updated cart data
   } catch (error: any) {
     console.error('Error removing item from cart:', error.response ? error.response.data : error.message);
     throw error;
   }
 };
-// Order APIs
 
-// Create a new order
+// Order APIs
 export const createOrder = async (orderData: any) => {
   const response = await axiosInstance.post('/orders', orderData);
   return response.data; // Contains created order details
 };
 
-// Fetch order details by ID
 export const fetchOrderById = async (orderId: string) => {
   const response = await axiosInstance.get(`/orders/${orderId}`);
   return response.data; // Contains order details
 };
 
-// Fetch all orders for the logged-in user
 export const fetchUserOrders = async () => {
   const response = await axiosInstance.get('/orders');
   return response.data; // Contains list of user's orders
 };
 
 // Payment APIs
-
-// Initiate a payment
 export const initiatePayment = async (orderId: string, email: string, amount: number) => {
   const response = await axiosInstance.put(`/orders/${orderId}/payment`, { email, amount });
   return response.data; // Contains payment initiation details
 };
 
-// Verify payment
 export const verifyPayment = async (orderId: string, reference: string) => {
   const response = await axiosInstance.get(`/orders/${orderId}/verify-payment`, { params: { reference } });
   return response.data; // Contains payment verification result
